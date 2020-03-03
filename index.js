@@ -1,7 +1,11 @@
 // While using AWS Lambda the following package can be used a Lambda function can directly be used
 // const { ApolloServer, gql } = require("apollo-server-lambda");
 const { ApolloServer, gql } = require("apollo-server");
+
 const mongoose = require("mongoose");
+
+const typeDefs = require('./schemas')
+const resolvers = require('./resolvers')
 
 mongoose
   .connect(
@@ -15,33 +19,33 @@ mongoose
     throw(err);
   });
 
-const books = [
-  {
-    title: "Harry Potter and the Chamber of Secrets",
-    author: "J.K. Rowling"
-  },
-  {
-    title: "Jurassic Park",
-    author: "Michael Crichton"
-  }
-];
+// const books = [
+//   {
+//     title: "Harry Potter and the Chamber of Secrets",
+//     author: "J.K. Rowling"
+//   },
+//   {
+//     title: "Jurassic Park",
+//     author: "Michael Crichton"
+//   }
+// ];
 
-const typeDefs = gql`
-  type Book {
-    title: String
-    author: String
-  }
+// const typeDefs = gql`
+//   type Book {
+//     title: String
+//     author: String
+//   }
 
-  type Query {
-    books: [Book]
-  }
-`;
+//   type Query {
+//     books: [Book]
+//   }
+// `;
 
-const resolvers = {
-  Query: {
-    books: () => books
-  }
-};
+// const resolvers = {
+//   Query: {
+//     books: () => books
+//   }
+// };
 
 const server = new ApolloServer({ typeDefs, resolvers });
 
