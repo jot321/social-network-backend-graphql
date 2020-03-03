@@ -1,0 +1,8 @@
+{
+    "env": {
+        "MONGO_USER": "jot321",
+        "MONGO_PASSWORD": "jot321",
+        "MONGO_DB": "test",
+        "MONGO_CLUSTER": "cluster0-yk5pq.mongodb.net"
+    }
+}
