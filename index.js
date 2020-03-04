@@ -1,62 +1,36 @@
 // While using AWS Lambda the following package can be used a Lambda function can directly be used
-// const { ApolloServer, gql } = require("apollo-server-lambda");
-const { ApolloServer, gql } = require("apollo-server");
+// const { ApolloServer } = require("apollo-server-lambda");
+const { ApolloServer } = require("apollo-server");
 
 const mongoose = require("mongoose");
+const config = require("./config.json");
 
-const typeDefs = require('./schemas')
-const resolvers = require('./resolvers')
+const typeDefs = require("./schemas");
+const resolvers = require("./resolvers");
 
 mongoose
   .connect(
-    `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_CLUSTER}/${process.env.MONGO_DB}?retryWrites=true`
+    `mongodb+srv://${config.MONGO_USER}:${config.MONGO_PASSWORD}@${config.MONGO_CLUSTER}/${config.MONGO_DB}?retryWrites=true`
+    // "mongodb+srv://jot321:jot321@cluster0-yk5pq.mongodb.net/test?retryWrites=true&w=majority"
   )
   .then(() => {
     console.log("MongoDb Connected!!!");
   })
   .catch(err => {
     console.log(err);
-    throw(err);
+    throw err;
   });
-
-// const books = [
-//   {
-//     title: "Harry Potter and the Chamber of Secrets",
-//     author: "J.K. Rowling"
-//   },
-//   {
-//     title: "Jurassic Park",
-//     author: "Michael Crichton"
-//   }
-// ];
-
-// const typeDefs = gql`
-//   type Book {
-//     title: String
-//     author: String
-//   }
-
-//   type Query {
-//     books: [Book]
-//   }
-// `;
-
-// const resolvers = {
-//   Query: {
-//     books: () => books
-//   }
-// };
 
 const server = new ApolloServer({ typeDefs, resolvers });
 
 // -------------------------
 // To deploy the server on AWS Lambda
 // exports.graphqlHandler = server.createHandler({
-//     cors: {
-//       origin: true,
-//       credentials: true,
-//     },
-//   });
+//   cors: {
+//     origin: true,
+//     credentials: true
+//   }
+// });
 
 // -------------------------
 // To run the server locally

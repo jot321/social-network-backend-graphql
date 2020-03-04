@@ -17,13 +17,29 @@ module.exports = gql`
     description: String!
   }
 
+  type ShortArticle{
+    _id: ID!
+    title: String!
+    byline: String!
+    description: String!
+    attachedImage: String!
+    category_name: String!
+    tags_name: [String]
+    likes: Float!
+    shares: Float!
+  }
+
   type Query {
     posts: [Post!]!
+    getShortArticles: [ShortArticle!]!
   }
 
   type Mutation {
     createPost(postInput: PostInput): Post
     incrementLikes(postId: ID!): Post
     incrementShares(postId: ID!): Post
+
+    incrementLikesForShortArticles(id: ID!): ShortArticle
+    incrementSharesForShortArticles(id: ID!): ShortArticle
   }
 `;
