@@ -17,14 +17,17 @@ module.exports = gql`
     description: String!
   }
 
-  type ShortArticle{
+  type ShortArticle {
     _id: ID!
+    CMS_ID: String!
     title: String!
     byline: String!
     description: String!
     attachedImage: String!
-    category_name: String!
-    tags_name: [String]
+    top_level_category_name: String!
+    visible_tags_names: [String!]
+    not_visible_tags_names: [String!]
+    sub_category_names: [String!]!
     likes: Float!
     shares: Float!
   }
@@ -41,5 +44,7 @@ module.exports = gql`
 
     incrementLikesForShortArticles(id: ID!): ShortArticle
     incrementSharesForShortArticles(id: ID!): ShortArticle
+    decrementLikesForShortArticles(id: ID!): ShortArticle
+    decrementSharesForShortArticles(id: ID!): ShortArticle
   }
 `;

@@ -23,12 +23,19 @@ const shortArticleSchema = new Schema({
     type: String,
     required: true
   },
-  category_name: {
+  top_level_category_name: {
     type: String,
     required: true
   },
-  tags_name: {
+  visible_tags_names: {
     type: [String ]
+  },
+  not_visible_tags_names: {
+    type: [String ]
+  },
+  sub_category_names: {
+    type: [String ],
+    required: true
   },
   likes: {
     type: Number,
