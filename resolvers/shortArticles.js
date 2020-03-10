@@ -2,9 +2,16 @@ const ShortArticle = require("../models/shortArticles");
 
 module.exports = {
   Query: {
-    getShortArticles: async () => {
+    getShortArticles: async (parent, args) => {
       try {
-        const shortArticles = await ShortArticle.find();
+
+        let shortArticle;
+        if (args.sortByLikes) {
+          shortArticles = await ShortArticle.find().sort({ likes: -1 });
+        } else {
+          shortArticles = await ShortArticle.find();
+        }
+
         return shortArticles;
       } catch (err) {
         throw err;

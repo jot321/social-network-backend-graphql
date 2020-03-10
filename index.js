@@ -10,8 +10,9 @@ const resolvers = require("./resolvers");
 
 mongoose
   .connect(
-    `mongodb+srv://${config.MONGO_USER}:${config.MONGO_PASSWORD}@${config.MONGO_CLUSTER}/${config.MONGO_DB}?retryWrites=true`
+    // `mongodb+srv://${config.MONGO_USER}:${config.MONGO_PASSWORD}@${config.MONGO_CLUSTER}/${config.MONGO_DB}?retryWrites=true`
     // "mongodb+srv://jot321:jot321@cluster0-yk5pq.mongodb.net/test?retryWrites=true&w=majority"
+    "mongodb://root:example@127.0.0.1:27017"
   )
   .then(() => {
     console.log("MongoDb Connected!!!");

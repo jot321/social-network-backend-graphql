@@ -32,9 +32,45 @@ module.exports = gql`
     shares: Float!
   }
 
+  type ImageArticle {
+    _id: ID!
+    CMS_ID: String!
+    image: String!
+    top_level_category_name: String!
+    visible_tags_names: [String!]
+    not_visible_tags_names: [String!]
+    sub_category_names: [String!]!
+    likes: Float!
+    shares: Float!
+  }
+
+  type ListicleItem{
+    listicleItemHeader: String!
+    listicleItemDescription: String!
+  }
+
+  type Listicle {
+    _id: ID!
+    CMS_ID: String!
+    title: String!
+    byline: String!
+    description: String!
+    attachedImage: String!
+    listicleItems: [ListicleItem]
+    top_level_category_name: String!
+    visible_tags_names: [String!]
+    not_visible_tags_names: [String!]
+    sub_category_names: [String!]!
+    likes: Float!
+    shares: Float!
+  }
+
+
   type Query {
     posts: [Post!]!
-    getShortArticles: [ShortArticle!]!
+    getShortArticles(sortByLikes: Boolean = false): [ShortArticle!]!
+    getImageArticles: [ImageArticle!]!
+    getListicles: [Listicle!]!
   }
 
   type Mutation {
@@ -46,5 +82,11 @@ module.exports = gql`
     incrementSharesForShortArticles(id: ID!): ShortArticle
     decrementLikesForShortArticles(id: ID!): ShortArticle
     decrementSharesForShortArticles(id: ID!): ShortArticle
+
+
+    incrementLikesForImageArticles(id: ID!): ImageArticle
+    incrementSharesForImageArticles(id: ID!): ImageArticle
+    decrementLikesForImageArticles(id: ID!): ImageArticle
+    decrementSharesForImageArticles(id: ID!): ImageArticle
   }
 `;
