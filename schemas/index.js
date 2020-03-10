@@ -30,6 +30,7 @@ module.exports = gql`
     sub_category_names: [String!]!
     likes: Float!
     shares: Float!
+    importance: Float!
   }
 
   type ImageArticle {
@@ -42,6 +43,7 @@ module.exports = gql`
     sub_category_names: [String!]!
     likes: Float!
     shares: Float!
+    importance: Float!
   }
 
   type ListicleItem{
@@ -63,6 +65,7 @@ module.exports = gql`
     sub_category_names: [String!]!
     likes: Float!
     shares: Float!
+    importance: Float!
   }
 
 

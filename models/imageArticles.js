@@ -32,6 +32,9 @@ const imageArticleSchema = new Schema({
   shares: {
     type: Number,
     required: true
+  },
+  importance: {
+    type: Number
   }
 });
 
