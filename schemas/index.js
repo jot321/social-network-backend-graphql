@@ -46,7 +46,7 @@ module.exports = gql`
     importance: Float!
   }
 
-  type ListicleItem{
+  type ListicleItem {
     listicleItemHeader: String
     listicleItemDescription: String
   }
@@ -68,7 +68,7 @@ module.exports = gql`
     importance: Float!
   }
 
-  type InformationProperties{
+  type InformationProperties {
     id: ID!
     CMS_ID: String!
     type: Float!
@@ -79,33 +79,23 @@ module.exports = gql`
     hide: Float!
   }
 
-  type InformationMessage{
+  type InformationMessage {
     message: String!
     properties: String!
   }
 
   type Query {
     posts: [Post!]!
-    getShortArticles(sortByLikes: Boolean = false): [ShortArticle!]!
-    getImageArticles: [ImageArticle!]!
-    getListicles: [Listicle!]!
-    getHomeFeed: [InformationMessage!]!
+    getHomeFeed(sortByLikes: Boolean = false, popular: Boolean = false): [InformationMessage!]!
   }
 
   type Mutation {
     createPost(postInput: PostInput): Post
-    incrementLikes(postId: ID!): Post
-    incrementShares(postId: ID!): Post
 
-    incrementLikesForShortArticles(id: ID!): ShortArticle
-    incrementSharesForShortArticles(id: ID!): ShortArticle
-    decrementLikesForShortArticles(id: ID!): ShortArticle
-    decrementSharesForShortArticles(id: ID!): ShortArticle
+    incrementLikes(id: ID!): Boolean
+    incrementShares(id: ID!): Boolean
+    decrementLikes(id: ID!): Boolean
+    decrementShares(id: ID!): Boolean
 
-
-    incrementLikesForImageArticles(id: ID!): ImageArticle
-    incrementSharesForImageArticles(id: ID!): ImageArticle
-    decrementLikesForImageArticles(id: ID!): ImageArticle
-    decrementSharesForImageArticles(id: ID!): ImageArticle
   }
 `;
