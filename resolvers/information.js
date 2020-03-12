@@ -17,19 +17,32 @@ module.exports = {
       try {
         let messages = [];
         let informationPropertiesList_;
+        let count_;
 
-        if (args.sortByLikes) {
-          informationPropertiesList_ = await InformationProperties.find({ hide: false }).sort({
-            likes: -1
-          });
-        } else if (args.popular) {
-          informationPropertiesList_ = await InformationProperties.find({ hide: false, daily_pick: true }).sort({
-            importance: -1
-          });
+        if (args.dailyPicks) {
+          informationPropertiesList_ = await InformationProperties.find({ hide: false, daily_pick: true })
+            .sort({
+              importance: -1
+            })
+            .skip(args.offset)
+            .limit(args.fetchLimit);
+          count_ = informationPropertiesList_.length;
+        } else if (args.sortByLikes) {
+          informationPropertiesList_ = await InformationProperties.find({ hide: false })
+            .sort({
+              likes: -1
+            })
+            .skip(args.offset)
+            .limit(args.fetchLimit);
+          count_ = informationPropertiesList_.length;
         } else {
-          informationPropertiesList_ = await InformationProperties.find({ hide: false }).sort({
-            importance: -1
-          });
+          informationPropertiesList_ = await InformationProperties.find({ hide: false })
+            .sort({
+              importance: -1
+            })
+            .skip(args.offset)
+            .limit(args.fetchLimit);
+          count_ = informationPropertiesList_.length;
         }
 
         await Promise.all(
@@ -65,17 +78,24 @@ module.exports = {
           })
         );
 
-        // TODO - Improve the following
-
+        // TODO - Improve the sorting logic as JSON.parse will be called many times
         if (args.sortByLikes) {
-          return messages.sort((x, y) => {
+          messages = messages.sort((x, y) => {
             return JSON.parse(y.properties).likes - JSON.parse(x.properties).likes;
           });
         } else {
-          return messages.sort((x, y) => {
+          messages = messages.sort((x, y) => {
             return JSON.parse(y.properties).importance - JSON.parse(x.properties).importance;
           });
         }
+
+        let hasMore = true;
+
+        if (args.offset + args.fetchLimit > count_) {
+          hasMore = false;
+        }
+
+        return { messages: messages, hasMore: hasMore };
       } catch (err) {
         throw err;
       }

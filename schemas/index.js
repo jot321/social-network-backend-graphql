@@ -7,8 +7,8 @@ module.exports = gql`
     title: String!
     byline: String!
     description: String!
-    likes: Float!
-    shares: Float!
+    likes: Int!
+    shares: Int!
   }
 
   input PostInput {
@@ -28,9 +28,9 @@ module.exports = gql`
     visible_tags_names: [String!]
     not_visible_tags_names: [String!]
     sub_category_names: [String!]!
-    likes: Float!
-    shares: Float!
-    importance: Float!
+    likes: Int!
+    shares: Int!
+    importance: Int!
   }
 
   type ImageArticle {
@@ -41,9 +41,9 @@ module.exports = gql`
     visible_tags_names: [String!]
     not_visible_tags_names: [String!]
     sub_category_names: [String!]!
-    likes: Float!
-    shares: Float!
-    importance: Float!
+    likes: Int!
+    shares: Int!
+    importance: Int!
   }
 
   type ListicleItem {
@@ -63,30 +63,35 @@ module.exports = gql`
     visible_tags_names: [String!]
     not_visible_tags_names: [String!]
     sub_category_names: [String!]!
-    likes: Float!
-    shares: Float!
-    importance: Float!
+    likes: Int!
+    shares: Int!
+    importance: Int!
   }
 
   type InformationProperties {
     id: ID!
     CMS_ID: String!
-    type: Float!
-    likes: Float!
-    shares: Float!
-    importance: Float!
-    daily_pick: Float!
-    hide: Float!
+    type: Int!
+    likes: Int!
+    shares: Int!
+    importance: Int!
+    daily_pick: Int!
+    hide: Int!
   }
 
   type InformationMessage {
     message: String!
-    properties: String!
+    properties: String!    
+  }
+
+  type OutboundMessage {
+    messages: [InformationMessage!]!
+    hasMore: Boolean
   }
 
   type Query {
     posts: [Post!]!
-    getHomeFeed(sortByLikes: Boolean = false, popular: Boolean = false): [InformationMessage!]!
+    getHomeFeed(sortByLikes: Boolean = false, dailyPicks: Boolean = false, fetchLimit: Int = 5, offset: Int = 0): OutboundMessage!
   }
 
   type Mutation {
@@ -96,6 +101,5 @@ module.exports = gql`
     incrementShares(id: ID!): Boolean
     decrementLikes(id: ID!): Boolean
     decrementShares(id: ID!): Boolean
-
   }
 `;
