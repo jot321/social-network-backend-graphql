@@ -16,25 +16,14 @@ const imageArticleSchema = new Schema({
     required: true
   },
   visible_tags_names: {
-    type: [String ]
+    type: [String]
   },
   not_visible_tags_names: {
-    type: [String ]
+    type: [String]
   },
   sub_category_names: {
-    type: [String ],
+    type: [String],
     required: true
-  },
-  likes: {
-    type: Number,
-    required: true
-  },
-  shares: {
-    type: Number,
-    required: true
-  },
-  importance: {
-    type: Number
   }
 });
 

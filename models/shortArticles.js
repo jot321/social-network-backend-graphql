@@ -36,17 +36,6 @@ const shortArticleSchema = new Schema({
   sub_category_names: {
     type: [String ],
     required: true
-  },
-  likes: {
-    type: Number,
-    required: true
-  },
-  shares: {
-    type: Number,
-    required: true
-  },
-  importance: {
-    type: Number
   }
 });
 

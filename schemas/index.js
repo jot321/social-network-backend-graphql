@@ -47,8 +47,8 @@ module.exports = gql`
   }
 
   type ListicleItem{
-    listicleItemHeader: String!
-    listicleItemDescription: String!
+    listicleItemHeader: String
+    listicleItemDescription: String
   }
 
   type Listicle {
@@ -68,12 +68,28 @@ module.exports = gql`
     importance: Float!
   }
 
+  type InformationProperties{
+    id: ID!
+    CMS_ID: String!
+    type: Float!
+    likes: Float!
+    shares: Float!
+    importance: Float!
+    daily_pick: Float!
+    hide: Float!
+  }
+
+  type InformationMessage{
+    message: String!
+    properties: String!
+  }
 
   type Query {
     posts: [Post!]!
     getShortArticles(sortByLikes: Boolean = false): [ShortArticle!]!
     getImageArticles: [ImageArticle!]!
     getListicles: [Listicle!]!
+    getHomeFeed: [InformationMessage!]!
   }
 
   type Mutation {
