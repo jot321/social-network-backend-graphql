@@ -26,7 +26,8 @@ module.exports = {
             })
             .skip(args.offset)
             .limit(args.fetchLimit);
-          count_ = informationPropertiesList_.length;
+
+          count_ = await InformationProperties.find({ hide: false, daily_pick: true }).countDocuments();
         } else if (args.sortByLikes) {
           informationPropertiesList_ = await InformationProperties.find({ hide: false })
             .sort({
@@ -34,7 +35,7 @@ module.exports = {
             })
             .skip(args.offset)
             .limit(args.fetchLimit);
-          count_ = informationPropertiesList_.length;
+          count_ = await InformationProperties.find({ hide: false }).countDocuments();
         } else {
           informationPropertiesList_ = await InformationProperties.find({ hide: false })
             .sort({
@@ -42,7 +43,7 @@ module.exports = {
             })
             .skip(args.offset)
             .limit(args.fetchLimit);
-          count_ = informationPropertiesList_.length;
+          count_ = await InformationProperties.find({ hide: false }).countDocuments();
         }
 
         await Promise.all(
