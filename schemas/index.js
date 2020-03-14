@@ -81,7 +81,7 @@ module.exports = gql`
 
   type InformationMessage {
     message: String!
-    properties: String!    
+    properties: String!
   }
 
   type OutboundMessage {
@@ -91,7 +91,14 @@ module.exports = gql`
 
   type Query {
     posts: [Post!]!
-    getHomeFeed(sortByLikes: Boolean = false, dailyPicks: Boolean = false, fetchLimit: Int = 5, offset: Int = 0): OutboundMessage!
+    getHomeFeed(
+      sortByLikes: Boolean = false
+      dailyPicks: Boolean = false
+      fetchLimit: Int = 5
+      offset: Int = 0
+      category: String = null
+      tag: String = null
+    ): OutboundMessage!
   }
 
   type Mutation {

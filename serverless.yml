@@ -16,3 +16,4 @@ functions:
         path: graphql
         method: get
         cors: true
+

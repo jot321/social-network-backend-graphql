@@ -2,7 +2,7 @@ const ShortArticle = require("../models/shortArticles");
 const Listicle = require("../models/listicles");
 const ImageArticle = require("../models/imageArticles");
 
-const InformationProperties = require("../models/InformationProperties");
+const InformationProperties = require("../models/informationProperties");
 
 const InformationType = {
   LISTICLE: 1,
@@ -19,7 +19,31 @@ module.exports = {
         let informationPropertiesList_;
         let count_;
 
-        if (args.dailyPicks) {
+        if (args.category) {
+          informationPropertiesList_ = await InformationProperties.find({
+            hide: false,
+            sub_category_names: args.category
+          })
+            .sort({
+              importance: -1
+            })
+            .skip(args.offset)
+            .limit(args.fetchLimit);
+
+          count_ = await InformationProperties.find({ hide: false, daily_pick: true }).countDocuments();
+        } else if (args.tag) {
+          informationPropertiesList_ = await InformationProperties.find({
+            hide: false,
+            visible_tags_names: args.tag
+          })
+            .sort({
+              importance: -1
+            })
+            .skip(args.offset)
+            .limit(args.fetchLimit);
+
+          count_ = await InformationProperties.find({ hide: false, daily_pick: true }).countDocuments();
+        } else if (args.dailyPicks) {
           informationPropertiesList_ = await InformationProperties.find({ hide: false, daily_pick: true })
             .sort({
               importance: -1
