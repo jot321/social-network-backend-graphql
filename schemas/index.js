@@ -96,8 +96,11 @@ module.exports = gql`
       dailyPicks: Boolean = false
       fetchLimit: Int = 5
       offset: Int = 0
+      toplevelcategory: String = null
       category: String = null
       tag: String = null
+      searchKey: String = null
+      articleId: String = null
     ): OutboundMessage!
   }
 

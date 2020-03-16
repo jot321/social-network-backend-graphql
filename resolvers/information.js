@@ -17,9 +17,39 @@ module.exports = {
       try {
         let messages = [];
         let informationPropertiesList_;
-        let count_;
+        let count_ = 0;
 
-        if (args.category) {
+        if (args.articleId) {
+          informationPropertiesList_ = await InformationProperties.find({
+            hide: false,
+            CMS_ID: args.articleId
+          });
+        } else if (args.searchKey) {
+          informationPropertiesList_ = await InformationProperties.find({
+            hide: false,
+            visible_tags_names: args.searchKey
+          })
+            .sort({
+              importance: -1
+            })
+            .skip(args.offset)
+            .limit(args.fetchLimit);
+
+          // TODO: Change the count document logic
+          count_ = await InformationProperties.find({ hide: false }).countDocuments();
+        } else if (args.toplevelcategory) {
+          informationPropertiesList_ = await InformationProperties.find({
+            hide: false,
+            top_level_category_name: args.toplevelcategory
+          })
+            .sort({
+              importance: -1
+            })
+            .skip(args.offset)
+            .limit(args.fetchLimit);
+
+          count_ = await InformationProperties.find({ hide: false }).countDocuments();
+        } else if (args.category) {
           informationPropertiesList_ = await InformationProperties.find({
             hide: false,
             sub_category_names: args.category
@@ -30,7 +60,7 @@ module.exports = {
             .skip(args.offset)
             .limit(args.fetchLimit);
 
-          count_ = await InformationProperties.find({ hide: false, daily_pick: true }).countDocuments();
+          count_ = await InformationProperties.find({ hide: false }).countDocuments();
         } else if (args.tag) {
           informationPropertiesList_ = await InformationProperties.find({
             hide: false,
@@ -42,7 +72,7 @@ module.exports = {
             .skip(args.offset)
             .limit(args.fetchLimit);
 
-          count_ = await InformationProperties.find({ hide: false, daily_pick: true }).countDocuments();
+          count_ = await InformationProperties.find({ hide: false }).countDocuments();
         } else if (args.dailyPicks) {
           informationPropertiesList_ = await InformationProperties.find({ hide: false, daily_pick: true })
             .sort({
