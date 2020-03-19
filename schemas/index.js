@@ -102,6 +102,10 @@ module.exports = gql`
       searchKey: String = null
       articleId: String = null
     ): OutboundMessage!
+
+    getRandomSampledArticleIds: [String!]!
+
+    getArticleInformationFromArrayofIds(inputIds: [String] = []): [InformationMessage!]!
   }
 
   type Mutation {

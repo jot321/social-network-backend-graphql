@@ -11,6 +11,44 @@ const InformationType = {
   TIP: 4
 };
 
+const populateInformationMessages = async informationPropertiesList => {
+  let messages = [];
+
+  await Promise.all(
+    informationPropertiesList.map(async element => {
+      let message_;
+
+      switch (element.type) {
+        case InformationType.SHORT_ARTICLE:
+          message_ = await ShortArticle.findOne({
+            CMS_ID: element.CMS_ID
+          });
+          break;
+
+        case InformationType.LISTICLE:
+          message_ = await Listicle.findOne({ CMS_ID: element.CMS_ID });
+          break;
+
+        case InformationType.IMAGE_ARTICLE:
+          message_ = await ImageArticle.findOne({
+            CMS_ID: element.CMS_ID
+          });
+          break;
+
+        default:
+          console.log("Information Type does not match");
+          break;
+      }
+
+      messages.push({
+        message: JSON.stringify(message_),
+        properties: JSON.stringify(element)
+      });
+    })
+  );
+  return messages;
+};
+
 module.exports = {
   Query: {
     getHomeFeed: async (parent, args) => {
@@ -48,7 +86,10 @@ module.exports = {
             .skip(args.offset)
             .limit(args.fetchLimit);
 
-          count_ = await InformationProperties.find({ hide: false }).countDocuments();
+          count_ = await InformationProperties.find({
+            hide: false,
+            top_level_category_name: args.toplevelcategory
+          }).countDocuments();
         } else if (args.category) {
           informationPropertiesList_ = await InformationProperties.find({
             hide: false,
@@ -92,9 +133,6 @@ module.exports = {
           count_ = await InformationProperties.find({ hide: false }).countDocuments();
         } else {
           informationPropertiesList_ = await InformationProperties.find({ hide: false })
-            .sort({
-              importance: -1
-            })
             .skip(args.offset)
             .limit(args.fetchLimit);
           count_ = await InformationProperties.find({ hide: false }).countDocuments();
@@ -154,6 +192,20 @@ module.exports = {
       } catch (err) {
         throw err;
       }
+    },
+    getRandomSampledArticleIds: async () => {
+      informationPropertiesIds_ = await InformationProperties.aggregate([
+        { $match: { hide: false } },
+        { $sample: { size: 10000 } },
+        { $project: { CMS_ID: 1 } }
+      ]);
+
+      return informationPropertiesIds_.map(x => x.CMS_ID);
+    },
+    getArticleInformationFromArrayofIds: async (parent, args) => {
+      informationPropertiesList_ = await InformationProperties.find({ CMS_ID: { $in: args.inputIds } });
+      messages = await populateInformationMessages(informationPropertiesList_);
+      return messages;
     }
   },
   Mutation: {
