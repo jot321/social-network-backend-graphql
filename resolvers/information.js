@@ -57,12 +57,21 @@ module.exports = {
         let informationPropertiesList_;
         let count_ = 0;
 
+        // INDIVIDUAL ARTICLE
         if (args.articleId) {
-          informationPropertiesList_ = await InformationProperties.find({
+          informationPropertiesListArticle_ = await InformationProperties.find({
             hide: false,
             CMS_ID: args.articleId
           });
-        } else if (args.searchKey) {
+
+          informationPropertiesListImportance_ = await InformationProperties.find({
+            hide: false
+          });
+
+          informationPropertiesList_ = [...informationPropertiesListArticle_, ...informationPropertiesListImportance_];
+        }
+        // ACTUAL SEARCH
+        else if (args.searchKey) {
           informationPropertiesList_ = await InformationProperties.find({
             hide: false,
             visible_tags_names: args.searchKey
@@ -75,7 +84,9 @@ module.exports = {
 
           // TODO: Change the count document logic
           count_ = await InformationProperties.find({ hide: false }).countDocuments();
-        } else if (args.toplevelcategory) {
+        }
+        // SEARCH BY TOP LEVEL CATEGORIES
+        else if (args.toplevelcategory) {
           informationPropertiesList_ = await InformationProperties.find({
             hide: false,
             top_level_category_name: args.toplevelcategory
@@ -90,7 +101,9 @@ module.exports = {
             hide: false,
             top_level_category_name: args.toplevelcategory
           }).countDocuments();
-        } else if (args.category) {
+        }
+        // SEARCH BY CATEGORIES
+        else if (args.category) {
           informationPropertiesList_ = await InformationProperties.find({
             hide: false,
             sub_category_names: args.category
@@ -102,7 +115,9 @@ module.exports = {
             .limit(args.fetchLimit);
 
           count_ = await InformationProperties.find({ hide: false }).countDocuments();
-        } else if (args.tag) {
+        }
+        // SEARCH BY TAGS
+        else if (args.tag) {
           informationPropertiesList_ = await InformationProperties.find({
             hide: false,
             visible_tags_names: args.tag
@@ -114,7 +129,9 @@ module.exports = {
             .limit(args.fetchLimit);
 
           count_ = await InformationProperties.find({ hide: false }).countDocuments();
-        } else if (args.dailyPicks) {
+        }
+        // FEATURED CATEGORY - DAILY_PICK
+        else if (args.dailyPicks) {
           informationPropertiesList_ = await InformationProperties.find({ hide: false, daily_pick: true })
             .sort({
               importance: -1
@@ -123,7 +140,9 @@ module.exports = {
             .limit(args.fetchLimit);
 
           count_ = await InformationProperties.find({ hide: false, daily_pick: true }).countDocuments();
-        } else if (args.sortByLikes) {
+        }
+        // POPULAR CATEGORY - SORT BY LIKES
+        else if (args.sortByLikes) {
           informationPropertiesList_ = await InformationProperties.find({ hide: false })
             .sort({
               likes: -1
@@ -138,38 +157,7 @@ module.exports = {
           count_ = await InformationProperties.find({ hide: false }).countDocuments();
         }
 
-        await Promise.all(
-          informationPropertiesList_.map(async element => {
-            let message_;
-
-            switch (element.type) {
-              case InformationType.SHORT_ARTICLE:
-                message_ = await ShortArticle.findOne({
-                  CMS_ID: element.CMS_ID
-                });
-                break;
-
-              case InformationType.LISTICLE:
-                message_ = await Listicle.findOne({ CMS_ID: element.CMS_ID });
-                break;
-
-              case InformationType.IMAGE_ARTICLE:
-                message_ = await ImageArticle.findOne({
-                  CMS_ID: element.CMS_ID
-                });
-                break;
-
-              default:
-                console.log("Information Type does not match");
-                break;
-            }
-
-            messages.push({
-              message: JSON.stringify(message_),
-              properties: JSON.stringify(element)
-            });
-          })
-        );
+        messages = await populateInformationMessages(informationPropertiesList_);
 
         // TODO - Improve the sorting logic as JSON.parse will be called many times
         if (args.sortByLikes) {
@@ -193,18 +181,29 @@ module.exports = {
         throw err;
       }
     },
-    getRandomSampledArticleIds: async () => {
+    getRandomSampledArticleIds: async (parent, args) => {
       informationPropertiesIds_ = await InformationProperties.aggregate([
         { $match: { hide: false } },
         { $sample: { size: 10000 } },
         { $project: { CMS_ID: 1 } }
       ]);
 
-      return informationPropertiesIds_.map(x => x.CMS_ID);
+      informationPropertiesIds_ = informationPropertiesIds_.map(x => x.CMS_ID);
+      return informationPropertiesIds_;
     },
     getArticleInformationFromArrayofIds: async (parent, args) => {
       informationPropertiesList_ = await InformationProperties.find({ CMS_ID: { $in: args.inputIds } });
       messages = await populateInformationMessages(informationPropertiesList_);
+
+      if (args.articleId) {
+        informationPropertiesListArticle_ = await InformationProperties.find({
+          hide: false,
+          CMS_ID: args.articleId
+        });
+        articleMessage = await populateInformationMessages(informationPropertiesListArticle_);
+        return [...articleMessage, ...messages];
+      }
+
       return messages;
     }
   },

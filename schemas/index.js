@@ -105,7 +105,10 @@ module.exports = gql`
 
     getRandomSampledArticleIds: [String!]!
 
-    getArticleInformationFromArrayofIds(inputIds: [String] = []): [InformationMessage!]!
+    getArticleInformationFromArrayofIds(
+      inputIds: [String] = []
+      articleId: String = null
+      ): [InformationMessage!]!
   }
 
   type Mutation {
