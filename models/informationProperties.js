@@ -30,6 +30,25 @@ const informationPropertiesSchema = new Schema({
   hide: {
     type: Boolean,
     required: true
+  },
+  popular: {
+    type: Boolean,
+    required: true,
+    default: true 
+  },
+  top_level_category_name: {
+    type: String,
+    required: true
+  },
+  visible_tags_names: {
+    type: [String]
+  },
+  not_visible_tags_names: {
+    type: [String]
+  },
+  sub_category_names: {
+    type: [String],
+    required: true
   }
 });
 

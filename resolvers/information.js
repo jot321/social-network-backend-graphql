@@ -137,7 +137,7 @@ module.exports = {
         }
         // POPULAR CATEGORY - SORT BY LIKES
         else if (args.sortByLikes) {
-          informationPropertiesList_ = await InformationProperties.find({ hide: false })
+          informationPropertiesList_ = await InformationProperties.find({ hide: false, popular: true })
             .sort({
               likes: -1
             })
