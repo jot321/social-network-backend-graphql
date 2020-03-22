@@ -59,16 +59,10 @@ module.exports = {
 
         // INDIVIDUAL ARTICLE
         if (args.articleId) {
-          informationPropertiesListArticle_ = await InformationProperties.find({
+          informationPropertiesList_ = await InformationProperties.find({
             hide: false,
             CMS_ID: args.articleId
           });
-
-          informationPropertiesListImportance_ = await InformationProperties.find({
-            hide: false
-          });
-
-          informationPropertiesList_ = [...informationPropertiesListArticle_, ...informationPropertiesListImportance_];
         }
         // ACTUAL SEARCH
         else if (args.searchKey) {
