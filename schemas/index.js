@@ -89,6 +89,11 @@ module.exports = gql`
     hasMore: Boolean
   }
 
+  type ProfessionalOutboundMessage {
+    messages: String
+    hasMore: Boolean
+  }
+
   type Query {
     posts: [Post!]!
     getHomeFeed(
@@ -108,7 +113,14 @@ module.exports = gql`
     getArticleInformationFromArrayofIds(
       inputIds: [String] = []
       articleId: String = null
-      ): [InformationMessage!]!
+    ): [InformationMessage!]!
+    getTips: OutboundMessage!
+
+    getProfessionals(
+      pid: String = null
+      fetchLimit: Int = 5
+      offset: Int = 0
+    ): ProfessionalOutboundMessage!
   }
 
   type Mutation {

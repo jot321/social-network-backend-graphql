@@ -1,6 +1,8 @@
 const ShortArticle = require("../models/shortArticles");
 const Listicle = require("../models/listicles");
 const ImageArticle = require("../models/imageArticles");
+const Tip = require("../models/tips");
+const Professional = require("../models/professionals");
 
 const InformationProperties = require("../models/informationProperties");
 
@@ -31,6 +33,12 @@ const populateInformationMessages = async informationPropertiesList => {
 
         case InformationType.IMAGE_ARTICLE:
           message_ = await ImageArticle.findOne({
+            CMS_ID: element.CMS_ID
+          });
+          break;
+
+        case InformationType.TIP:
+          message_ = await Tip.findOne({
             CMS_ID: element.CMS_ID
           });
           break;
@@ -77,7 +85,9 @@ module.exports = {
             .limit(args.fetchLimit);
 
           // TODO: Change the count document logic
-          count_ = await InformationProperties.find({ hide: false }).countDocuments();
+          count_ = await InformationProperties.find({
+            hide: false
+          }).countDocuments();
         }
         // SEARCH BY TOP LEVEL CATEGORIES
         else if (args.toplevelcategory) {
@@ -108,7 +118,9 @@ module.exports = {
             .skip(args.offset)
             .limit(args.fetchLimit);
 
-          count_ = await InformationProperties.find({ hide: false }).countDocuments();
+          count_ = await InformationProperties.find({
+            hide: false
+          }).countDocuments();
         }
         // SEARCH BY TAGS
         else if (args.tag) {
@@ -122,45 +134,69 @@ module.exports = {
             .skip(args.offset)
             .limit(args.fetchLimit);
 
-          count_ = await InformationProperties.find({ hide: false }).countDocuments();
+          count_ = await InformationProperties.find({
+            hide: false
+          }).countDocuments();
         }
         // FEATURED CATEGORY - DAILY_PICK
         else if (args.dailyPicks) {
-          informationPropertiesList_ = await InformationProperties.find({ hide: false, daily_pick: true })
+          informationPropertiesList_ = await InformationProperties.find({
+            hide: false,
+            daily_pick: true
+          })
             .sort({
               importance: -1
             })
             .skip(args.offset)
             .limit(args.fetchLimit);
 
-          count_ = await InformationProperties.find({ hide: false, daily_pick: true }).countDocuments();
+          count_ = await InformationProperties.find({
+            hide: false,
+            daily_pick: true
+          }).countDocuments();
         }
         // POPULAR CATEGORY - SORT BY LIKES
         else if (args.sortByLikes) {
-          informationPropertiesList_ = await InformationProperties.find({ hide: false, popular: true })
+          informationPropertiesList_ = await InformationProperties.find({
+            hide: false,
+            popular: true
+          })
             .sort({
               likes: -1
             })
             .skip(args.offset)
             .limit(args.fetchLimit);
-          count_ = await InformationProperties.find({ hide: false }).countDocuments();
+          count_ = await InformationProperties.find({
+            hide: false
+          }).countDocuments();
         } else {
-          informationPropertiesList_ = await InformationProperties.find({ hide: false })
+          informationPropertiesList_ = await InformationProperties.find({
+            hide: false
+          })
             .skip(args.offset)
             .limit(args.fetchLimit);
-          count_ = await InformationProperties.find({ hide: false }).countDocuments();
+          count_ = await InformationProperties.find({
+            hide: false
+          }).countDocuments();
         }
 
-        messages = await populateInformationMessages(informationPropertiesList_);
+        messages = await populateInformationMessages(
+          informationPropertiesList_
+        );
 
         // TODO - Improve the sorting logic as JSON.parse will be called many times
         if (args.sortByLikes) {
           messages = messages.sort((x, y) => {
-            return JSON.parse(y.properties).likes - JSON.parse(x.properties).likes;
+            return (
+              JSON.parse(y.properties).likes - JSON.parse(x.properties).likes
+            );
           });
         } else {
           messages = messages.sort((x, y) => {
-            return JSON.parse(y.properties).importance - JSON.parse(x.properties).importance;
+            return (
+              JSON.parse(y.properties).importance -
+              JSON.parse(x.properties).importance
+            );
           });
         }
 
@@ -186,7 +222,9 @@ module.exports = {
       return informationPropertiesIds_;
     },
     getArticleInformationFromArrayofIds: async (parent, args) => {
-      informationPropertiesList_ = await InformationProperties.find({ CMS_ID: { $in: args.inputIds } });
+      informationPropertiesList_ = await InformationProperties.find({
+        CMS_ID: { $in: args.inputIds }
+      });
       messages = await populateInformationMessages(informationPropertiesList_);
 
       if (args.articleId) {
@@ -194,18 +232,101 @@ module.exports = {
           hide: false,
           CMS_ID: args.articleId
         });
-        articleMessage = await populateInformationMessages(informationPropertiesListArticle_);
+        articleMessage = await populateInformationMessages(
+          informationPropertiesListArticle_
+        );
         return [...articleMessage, ...messages];
       }
 
       return messages;
+    },
+    getTips: async (parent, args) => {
+      try {
+        let messages = [];
+        let informationPropertiesList_;
+        let count_ = 0;
+
+        informationPropertiesList_ = await InformationProperties.find({
+          hide: false,
+          type: InformationType.TIP
+        })
+          .skip(args.offset)
+          .limit(args.fetchLimit);
+
+        count_ = await InformationProperties.find({
+          hide: false,
+          type: InformationType.TIP
+        }).countDocuments();
+        messages = await populateInformationMessages(
+          informationPropertiesList_
+        );
+
+        // TODO - Improve the sorting logic as JSON.parse will be called many times
+        if (args.sortByLikes) {
+          messages = messages.sort((x, y) => {
+            return (
+              JSON.parse(y.properties).likes - JSON.parse(x.properties).likes
+            );
+          });
+        } else {
+          messages = messages.sort((x, y) => {
+            return (
+              JSON.parse(y.properties).importance -
+              JSON.parse(x.properties).importance
+            );
+          });
+        }
+
+        let hasMore = true;
+
+        if (args.offset + args.fetchLimit > count_) {
+          hasMore = false;
+        }
+
+        return { messages: messages, hasMore: hasMore };
+      } catch (err) {
+        throw err;
+      }
+    },
+    getProfessionals: async (parent, args) => {
+      try {
+        let professionalsList_;
+        let count_ = 0;
+
+        if (args.pid) {
+          professionalsList_ = await Professional.find({
+            CMS_ID: args.pid
+          });
+          count_ = 1;
+        } else {
+          professionalsList_ = await Professional.find()
+            .skip(args.offset)
+            .limit(args.fetchLimit);
+
+          count_ = await Professional.find().countDocuments();
+        }
+
+        let hasMore = true;
+        if (args.offset + args.fetchLimit > count_) {
+          hasMore = false;
+        }
+
+        return {
+          messages: JSON.stringify(professionalsList_),
+          hasMore: hasMore
+        };
+      } catch (err) {
+        throw err;
+      }
     }
   },
   Mutation: {
     incrementLikes: async (parent, args) => {
       try {
         // TODO : Use the update method to do the following operation
-        const properties = await InformationProperties.findOne({ CMS_ID: args.id });
+        const properties = await InformationProperties.findOne({
+          CMS_ID: args.id
+        });
 
         properties.likes = properties.likes + 1;
         const result = properties
@@ -218,7 +339,9 @@ module.exports = {
     },
     incrementShares: async (parent, args) => {
       try {
-        const properties = await InformationProperties.findOne({ CMS_ID: args.id });
+        const properties = await InformationProperties.findOne({
+          CMS_ID: args.id
+        });
 
         properties.shares = properties.shares + 1;
         const result = properties
@@ -231,7 +354,9 @@ module.exports = {
     },
     decrementLikes: async (parent, args) => {
       try {
-        const properties = await InformationProperties.findOne({ CMS_ID: args.id });
+        const properties = await InformationProperties.findOne({
+          CMS_ID: args.id
+        });
 
         properties.likes = properties.likes - 1;
         const result = properties
@@ -244,7 +369,9 @@ module.exports = {
     },
     decrementShares: async (parent, args) => {
       try {
-        const properties = await InformationProperties.findOne({ CMS_ID: args.id });
+        const properties = await InformationProperties.findOne({
+          CMS_ID: args.id
+        });
 
         properties.shares = properties.shares - 1;
         const result = properties
