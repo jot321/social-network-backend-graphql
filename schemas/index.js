@@ -114,7 +114,11 @@ module.exports = gql`
       inputIds: [String] = []
       articleId: String = null
     ): [InformationMessage!]!
-    getTips: OutboundMessage!
+
+    getTips(
+      fetchLimit: Int = 5
+      offset: Int = 0
+    ): OutboundMessage!
 
     getProfessionals(
       pid: String = null
