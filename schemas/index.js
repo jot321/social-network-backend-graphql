@@ -94,6 +94,13 @@ module.exports = gql`
     hasMore: Boolean
   }
 
+  input UserInput {
+    user_id: ID!
+    name: String!
+    email: String!
+    image_url: String!
+  }
+
   type Query {
     posts: [Post!]!
     getHomeFeed(
@@ -118,7 +125,20 @@ module.exports = gql`
     getTips(
       fetchLimit: Int = 5
       offset: Int = 0
+      category: String = null
+      tag: String = null
     ): OutboundMessage!
+
+    getVideoPlaylistNames(
+      fetchLimit: Int = 5
+      offset: Int = 0
+    ): OutboundMessage!
+
+    getVideosFromPlaylist(
+      fetchLimit: Int = 5
+      offset: Int = 0
+      vpid: String = 0
+    ): String!
 
     getProfessionals(
       pid: String = null
@@ -129,6 +149,8 @@ module.exports = gql`
 
   type Mutation {
     createPost(postInput: PostInput): Post
+
+    addOrUpdateUser(userInput: UserInput): Boolean
 
     incrementLikes(id: ID!): Boolean
     incrementShares(id: ID!): Boolean

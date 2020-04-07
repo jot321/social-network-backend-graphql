@@ -17,7 +17,7 @@ mongoose
   .then(() => {
     console.log("MongoDb Connected!!!");
   })
-  .catch(err => {
+  .catch((err) => {
     console.log(err);
     throw err;
   });
@@ -29,8 +29,8 @@ const server = new ApolloServer({ typeDefs, resolvers });
 exports.graphqlHandler = server.createHandler({
   cors: {
     origin: true,
-    credentials: true
-  }
+    credentials: true,
+  },
 });
 
 // -------------------------
