@@ -5,16 +5,20 @@ const Schema = mongoose.Schema;
 const videoPlaylistsSchema = new Schema({
   CMS_ID: {
     type: String,
-    required: true
+    required: true,
   },
   name: {
     type: String,
-    required: true
+    required: true,
   },
   videoLinks: {
     type: [String],
-    required: true
-  }
+    required: true,
+  },
+  image: {
+    type: String,
+    required: true,
+  },
 });
 
 module.exports = mongoose.model("VideoPlaylists", videoPlaylistsSchema);

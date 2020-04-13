@@ -130,7 +130,7 @@ module.exports = gql`
     ): OutboundMessage!
 
     getVideoPlaylistNames(
-      fetchLimit: Int = 5
+      fetchLimit: Int = 6
       offset: Int = 0
     ): OutboundMessage!
 
@@ -145,16 +145,23 @@ module.exports = gql`
       fetchLimit: Int = 5
       offset: Int = 0
     ): ProfessionalOutboundMessage!
+
+    getBookmarkedPostsForAUser(userId: ID!): [InformationMessage!]
+    checkIfPostBookmarkedByUser(userId: ID!, CMS_ID: String!): Boolean
   }
 
   type Mutation {
     createPost(postInput: PostInput): Post
 
     addOrUpdateUser(userInput: UserInput): Boolean
+    bookmarkPost(userId: String, CMS_ID: String): Boolean
+    unBookmarkPost(userId: String, CMS_ID: String): Boolean
 
     incrementLikes(id: ID!): Boolean
     incrementShares(id: ID!): Boolean
     decrementLikes(id: ID!): Boolean
     decrementShares(id: ID!): Boolean
+    incrementBookmarks(id: ID!): Boolean
+    decrementBookmarks(id: ID!): Boolean
   }
 `;

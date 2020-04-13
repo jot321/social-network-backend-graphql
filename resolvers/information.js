@@ -4,7 +4,7 @@ const ImageArticle = require("../models/imageArticles");
 const Tip = require("../models/tips");
 const Professional = require("../models/professionals");
 const VideoPlaylist = require("../models/videoPlaylists");
-const User = require("../models/User");
+const User = require("../models/user");
 
 const InformationProperties = require("../models/informationProperties");
 
@@ -57,10 +57,12 @@ const populateInformationMessages = async (informationPropertiesList) => {
           break;
       }
 
-      messages.push({
-        message: JSON.stringify(message_),
-        properties: JSON.stringify(element),
-      });
+      if (message_) {
+        messages.push({
+          message: JSON.stringify(message_),
+          properties: JSON.stringify(element),
+        });
+      }
     })
   );
   return messages;
@@ -83,7 +85,7 @@ const populateMediaInformationMessages = async (
               {
                 CMS_ID: element.CMS_ID,
               },
-              { name: 1, byline: 1, CMS_ID: 1 }
+              { name: 1, byline: 1, CMS_ID: 1, image: 1 }
             );
           } else {
             message_ = await VideoPlaylist.findOne({
@@ -97,14 +99,17 @@ const populateMediaInformationMessages = async (
           break;
       }
 
-      messages.push({
-        message: JSON.stringify(message_),
-        properties: JSON.stringify(element),
-      });
+      if (message_) {
+        messages.push({
+          message: JSON.stringify(message_),
+          properties: JSON.stringify(element),
+        });
+      }
     })
   );
   return messages;
 };
+
 module.exports = {
   Query: {
     getHomeFeed: async (parent, args) => {
@@ -261,7 +266,18 @@ module.exports = {
     },
     getRandomSampledArticleIds: async (parent, args) => {
       informationPropertiesIds_ = await InformationProperties.aggregate([
-        { $match: { hide: false, type: InformationType.LISTICLE } },
+        {
+          $match: {
+            hide: false,
+            type: {
+              $in: [
+                InformationType.SHORT_ARTICLE,
+                InformationType.LISTICLE,
+                InformationType.TIP,
+              ],
+            },
+          },
+        },
         { $sample: { size: 10000 } },
         { $project: { CMS_ID: 1 } },
       ]);
@@ -442,6 +458,50 @@ module.exports = {
         throw err;
       }
     },
+    getBookmarkedPostsForAUser: async (parent, args) => {
+      try {
+        const user = await User.findOne({ id: args.userId });
+
+        if (user) {
+          informationPropertiesList_ = await InformationProperties.find({
+            CMS_ID: { $in: user.bookmarkedPosts },
+          });
+          messages = await populateInformationMessages(
+            informationPropertiesList_
+          );
+          return messages;
+        } else {
+          console.log("ERROR: Not able to find user.");
+          return [];
+        }
+      } catch {
+        (err) => {
+          console.log(err);
+          return false;
+        };
+      }
+    },
+    checkIfPostBookmarkedByUser: async (parent, args) => {
+      try {
+        const user = await User.findOne({ id: args.userId });
+
+        if (user) {
+          if (user.bookmarkedPosts.indexOf(args.CMS_ID) > -1) {
+            return true;
+          } else {
+            return false;
+          }
+        } else {
+          console.log("ERROR: Not able to find user.");
+          return false;
+        }
+      } catch {
+        (err) => {
+          console.log(err);
+          return false;
+        };
+      }
+    },
   },
   Mutation: {
     addOrUpdateUser: async (parent, args) => {
@@ -476,6 +536,58 @@ module.exports = {
             console.log(err);
             return false;
           });
+      } catch {
+        (err) => {
+          console.log(err);
+          return false;
+        };
+      }
+    },
+    bookmarkPost: async (parent, args) => {
+      try {
+        const user = await User.findOne({ id: args.userId });
+
+        if (user) {
+          user.bookmarkedPosts.push(args.CMS_ID);
+          user.bookmarkedPosts = [...new Set(user.bookmarkedPosts)];
+
+          const result = user
+            .save()
+            .then(() => true)
+            .catch(() => false);
+
+          return true;
+        } else {
+          console.log("ERROR: Not able to find user.");
+          return false;
+        }
+      } catch {
+        (err) => {
+          console.log(err);
+          return false;
+        };
+      }
+    },
+    unBookmarkPost: async (parent, args) => {
+      try {
+        const user = await User.findOne({ id: args.userId });
+
+        if (user) {
+          const index = await user.bookmarkedPosts.indexOf(args.CMS_ID);
+          if (index > -1) {
+            user.bookmarkedPosts.splice(index, 1);
+
+            const result = user
+              .save()
+              .then(() => true)
+              .catch(() => false);
+          }
+
+          return true;
+        } else {
+          console.log("ERROR: Not able to find user.");
+          return false;
+        }
       } catch {
         (err) => {
           console.log(err);
@@ -536,6 +648,38 @@ module.exports = {
         });
 
         properties.shares = properties.shares - 1;
+        const result = properties
+          .save()
+          .then(() => true)
+          .catch(() => false);
+      } catch (err) {
+        throw err;
+      }
+    },
+    incrementBookmarks: async (parent, args) => {
+      try {
+        // TODO : Use the update method to do the following operation
+        const properties = await InformationProperties.findOne({
+          CMS_ID: args.id,
+        });
+
+        properties.bookmarks = properties.bookmarks + 1;
+        const result = properties
+          .save()
+          .then(() => true)
+          .catch(() => false);
+      } catch (err) {
+        throw err;
+      }
+    },
+    decrementBookmarks: async (parent, args) => {
+      try {
+        // TODO : Use the update method to do the following operation
+        const properties = await InformationProperties.findOne({
+          CMS_ID: args.id,
+        });
+
+        properties.bookmarks = properties.bookmarks - 1;
         const result = properties
           .save()
           .then(() => true)
