@@ -2,6 +2,17 @@ const mongoose = require("mongoose");
 
 const Schema = mongoose.Schema;
 
+const videoLinkSchema = new Schema({
+  CMS_ID: {
+    type: String,
+    required: true,
+  },
+  videoLink: {
+    type: String,
+    required: true,
+  },
+});
+
 const videoPlaylistsSchema = new Schema({
   CMS_ID: {
     type: String,
@@ -11,9 +22,11 @@ const videoPlaylistsSchema = new Schema({
     type: String,
     required: true,
   },
-  videoLinks: {
-    type: [String],
-    required: true,
+  byline: {
+    type: String,
+  },
+  videoLinksB: {
+    type: [videoLinkSchema],
   },
   image: {
     type: String,
@@ -21,4 +34,7 @@ const videoPlaylistsSchema = new Schema({
   },
 });
 
-module.exports = mongoose.model("VideoPlaylists", videoPlaylistsSchema);
+module.exports = {
+  videoPlaylistsSchema: mongoose.model("VideoPlaylists", videoPlaylistsSchema),
+  videoLinkSchema: mongoose.model("VideoLinks", videoLinkSchema),
+};

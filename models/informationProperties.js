@@ -43,7 +43,6 @@ const informationPropertiesSchema = new Schema({
   },
   top_level_category_name: {
     type: String,
-    required: true,
   },
   visible_tags_names: {
     type: [String],
@@ -53,7 +52,6 @@ const informationPropertiesSchema = new Schema({
   },
   sub_category_names: {
     type: [String],
-    required: true,
   },
 });
 

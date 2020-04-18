@@ -3,7 +3,8 @@ const Listicle = require("../models/listicles");
 const ImageArticle = require("../models/imageArticles");
 const Tip = require("../models/tips");
 const Professional = require("../models/professionals");
-const VideoPlaylist = require("../models/videoPlaylists");
+const VideoPlaylist = require("../models/videoPlaylists").videoPlaylistsSchema;
+const VideoLink = require("../models/videoPlaylists").videoLinkSchema;
 const User = require("../models/user");
 
 const InformationProperties = require("../models/informationProperties");
@@ -14,6 +15,7 @@ const InformationType = {
   IMAGE_ARTICLE: 3,
   TIP: 4,
   VIDEOPLAYLIST: 5,
+  VIDEOLINK: 6,
 };
 
 const populateInformationMessages = async (informationPropertiesList) => {
@@ -52,6 +54,12 @@ const populateInformationMessages = async (informationPropertiesList) => {
           });
           break;
 
+        case InformationType.VIDEOLINK:
+          message_ = await VideoLink.findOne({
+            CMS_ID: element.CMS_ID,
+          });
+          break;
+
         default:
           console.log("Information Type does not match");
           break;
@@ -85,7 +93,7 @@ const populateMediaInformationMessages = async (
               {
                 CMS_ID: element.CMS_ID,
               },
-              { name: 1, byline: 1, CMS_ID: 1, image: 1 }
+              { name: 1, CMS_ID: 1, image: 1 }
             );
           } else {
             message_ = await VideoPlaylist.findOne({
@@ -376,7 +384,6 @@ module.exports = {
         }
 
         let hasMore = true;
-
         if (args.offset + args.fetchLimit > count_) {
           hasMore = false;
         }
@@ -451,9 +458,36 @@ module.exports = {
     },
     getVideosFromPlaylist: async (parent, args) => {
       try {
-        videosList_ = await VideoPlaylist.findOne({ CMS_ID: args.vpid });
+        let videosInformation_ = {};
 
-        return JSON.stringify(videosList_);
+        videoList_ = await VideoPlaylist.findOne({ CMS_ID: args.vpid });
+
+        videosInformation_.CMS_ID = videoList_.CMS_ID;
+        videosInformation_.name = videoList_.name;
+        videosInformation_.byline = videoList_.byline;
+        videosInformation_.image = videoList_.image;
+        videosInformation_.videoLinks = [];
+
+        videosInformation_.properties = await InformationProperties.findOne({
+          CMS_ID: args.vpid,
+        });
+
+        await Promise.all(
+          videoList_.videoLinksB.map(async (video) => {
+            const individualVideoInformation_ = {};
+            individualVideoInformation_.CMS_ID = video.CMS_ID;
+            individualVideoInformation_.videoLink = video.videoLink;
+
+            individualVideoInformation_.properties = await InformationProperties.findOne(
+              {
+                CMS_ID: video.CMS_ID,
+              }
+            );
+            videosInformation_.videoLinks.push(individualVideoInformation_);
+          })
+        );
+
+        return JSON.stringify(videosInformation_);
       } catch (err) {
         throw err;
       }
@@ -603,10 +637,12 @@ module.exports = {
         });
 
         properties.likes = properties.likes + 1;
-        const result = properties
+        properties
           .save()
           .then(() => true)
-          .catch(() => false);
+          .catch((err) => {
+            console.log(err);
+          });
       } catch (err) {
         throw err;
       }
@@ -664,7 +700,7 @@ module.exports = {
         });
 
         properties.bookmarks = properties.bookmarks + 1;
-        const result = properties
+        properties
           .save()
           .then(() => true)
           .catch(() => false);
