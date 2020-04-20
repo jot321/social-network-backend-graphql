@@ -132,13 +132,10 @@ module.exports = gql`
     getVideoPlaylistNames(
       fetchLimit: Int = 6
       offset: Int = 0
+      toplevelcategory: String = null
     ): OutboundMessage!
 
-    getVideosFromPlaylist(
-      fetchLimit: Int = 5
-      offset: Int = 0
-      vpid: String = 0
-    ): String!
+    getVideosFromPlaylist(fetchLimit: Int = 5, offset: Int = 0, vpid: String = 0): String!
 
     getProfessionals(
       pid: String = null
