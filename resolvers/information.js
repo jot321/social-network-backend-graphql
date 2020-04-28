@@ -76,7 +76,10 @@ const populateInformationMessages = async (informationPropertiesList) => {
   return messages;
 };
 
-const populateMediaInformationMessages = async (informationPropertiesList, onlyNames = false) => {
+const populateMediaInformationMessages = async (
+  informationPropertiesList,
+  onlyNames = false
+) => {
   let messages = [];
 
   await Promise.all(
@@ -238,16 +241,23 @@ module.exports = {
           }).countDocuments();
         }
 
-        messages = await populateInformationMessages(informationPropertiesList_);
+        messages = await populateInformationMessages(
+          informationPropertiesList_
+        );
 
         // TODO - Improve the sorting logic as JSON.parse will be called many times
         if (args.sortByLikes) {
           messages = messages.sort((x, y) => {
-            return JSON.parse(y.properties).likes - JSON.parse(x.properties).likes;
+            return (
+              JSON.parse(y.properties).likes - JSON.parse(x.properties).likes
+            );
           });
         } else {
           messages = messages.sort((x, y) => {
-            return JSON.parse(y.properties).importance - JSON.parse(x.properties).importance;
+            return (
+              JSON.parse(y.properties).importance -
+              JSON.parse(x.properties).importance
+            );
           });
         }
 
@@ -268,7 +278,11 @@ module.exports = {
           $match: {
             hide: false,
             type: {
-              $in: [InformationType.SHORT_ARTICLE, InformationType.LISTICLE, InformationType.TIP],
+              $in: [
+                InformationType.SHORT_ARTICLE,
+                InformationType.LISTICLE,
+                InformationType.TIP,
+              ],
             },
           },
         },
@@ -276,7 +290,9 @@ module.exports = {
         { $project: { CMS_ID: 1 } },
       ]);
 
-      informationPropertiesIds_ = informationPropertiesIds_.map((x) => x.CMS_ID);
+      informationPropertiesIds_ = informationPropertiesIds_.map(
+        (x) => x.CMS_ID
+      );
       return informationPropertiesIds_;
     },
     getArticleInformationFromArrayofIds: async (parent, args) => {
@@ -290,7 +306,9 @@ module.exports = {
           hide: false,
           CMS_ID: args.articleId,
         });
-        articleMessage = await populateInformationMessages(informationPropertiesListArticle_);
+        articleMessage = await populateInformationMessages(
+          informationPropertiesListArticle_
+        );
         return [...articleMessage, ...messages];
       }
 
@@ -345,16 +363,23 @@ module.exports = {
           }).countDocuments();
         }
 
-        messages = await populateInformationMessages(informationPropertiesList_);
+        messages = await populateInformationMessages(
+          informationPropertiesList_
+        );
 
         // TODO - Improve the sorting logic as JSON.parse will be called many times
         if (args.sortByLikes) {
           messages = messages.sort((x, y) => {
-            return JSON.parse(y.properties).likes - JSON.parse(x.properties).likes;
+            return (
+              JSON.parse(y.properties).likes - JSON.parse(x.properties).likes
+            );
           });
         } else {
           messages = messages.sort((x, y) => {
-            return JSON.parse(y.properties).importance - JSON.parse(x.properties).importance;
+            return (
+              JSON.parse(y.properties).importance -
+              JSON.parse(x.properties).importance
+            );
           });
         }
 
@@ -373,13 +398,15 @@ module.exports = {
         let professionalsList_;
         let count_ = 0;
 
-        if (args.pid) {
+        if (args.slug) {
           professionalsList_ = await Professional.find({
-            CMS_ID: args.pid,
+            slug: args.slug,
           });
           count_ = 1;
         } else {
-          professionalsList_ = await Professional.find().skip(args.offset).limit(args.fetchLimit);
+          professionalsList_ = await Professional.find()
+            .skip(args.offset)
+            .limit(args.fetchLimit);
 
           count_ = await Professional.find().countDocuments();
         }
@@ -403,6 +430,7 @@ module.exports = {
         let informationPropertiesList_;
         let count_ = 0;
 
+        // Search using top level category name
         if (args.toplevelcategory) {
           informationPropertiesList_ = await InformationProperties.find({
             type: InformationType.VIDEOPLAYLIST,
@@ -413,9 +441,27 @@ module.exports = {
 
           count_ = await InformationProperties.find({
             type: InformationType.VIDEOPLAYLIST,
-            top_level_category_name: args.top_level_category_name,
+            top_level_category_name: args.toplevelcategory,
           }).countDocuments();
-        } else {
+        }
+
+        // Search using the top level category slug. Was added later so didn't remove the above
+        else if (args.topLevelCategorySlug) {
+          informationPropertiesList_ = await InformationProperties.find({
+            type: InformationType.VIDEOPLAYLIST,
+            top_level_category_slug: args.topLevelCategorySlug,
+          })
+            .skip(args.offset)
+            .limit(args.fetchLimit);
+
+          count_ = await InformationProperties.find({
+            type: InformationType.VIDEOPLAYLIST,
+            top_level_category_slug: args.topLevelCategorySlug,
+          }).countDocuments();
+        }
+
+        // Return default
+        else {
           informationPropertiesList_ = await InformationProperties.find({
             type: InformationType.VIDEOPLAYLIST,
           })
@@ -427,10 +473,12 @@ module.exports = {
           }).countDocuments();
         }
 
-        messages = await populateMediaInformationMessages(informationPropertiesList_, true);
+        messages = await populateMediaInformationMessages(
+          informationPropertiesList_,
+          true
+        );
 
         let hasMore = true;
-
         if (args.offset + args.fetchLimit > count_) {
           hasMore = false;
         }
@@ -462,9 +510,11 @@ module.exports = {
             individualVideoInformation_.CMS_ID = video.CMS_ID;
             individualVideoInformation_.videoLink = video.videoLink;
 
-            individualVideoInformation_.properties = await InformationProperties.findOne({
-              CMS_ID: video.CMS_ID,
-            });
+            individualVideoInformation_.properties = await InformationProperties.findOne(
+              {
+                CMS_ID: video.CMS_ID,
+              }
+            );
             videosInformation_.videoLinks.push(individualVideoInformation_);
           })
         );
@@ -482,7 +532,9 @@ module.exports = {
           informationPropertiesList_ = await InformationProperties.find({
             CMS_ID: { $in: user.bookmarkedPosts },
           });
-          messages = await populateInformationMessages(informationPropertiesList_);
+          messages = await populateInformationMessages(
+            informationPropertiesList_
+          );
           return messages;
         } else {
           console.log("ERROR: Not able to find user.");
@@ -506,7 +558,6 @@ module.exports = {
             return false;
           }
         } else {
-          console.log("ERROR: Not able to find user.");
           return false;
         }
       } catch {

@@ -44,6 +44,9 @@ const informationPropertiesSchema = new Schema({
   top_level_category_name: {
     type: String,
   },
+  top_level_category_slug: {
+    type: String,
+  },
   visible_tags_names: {
     type: [String],
   },
@@ -52,6 +55,9 @@ const informationPropertiesSchema = new Schema({
   },
   sub_category_names: {
     type: [String],
+  },
+  video_sub_category: {
+    type: String,
   },
 });
 

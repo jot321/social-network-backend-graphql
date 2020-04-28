@@ -2,66 +2,88 @@ const mongoose = require("mongoose");
 
 const Schema = mongoose.Schema;
 
-const timingsSchema = new Schema({
-  dayOfWeek: {
-    type: String,
-    required: true
-  },
-  timeOfDay: {
-    type: String,
-    required: true
-  }
-});
-
-const coursesSchema = new Schema({
+const eventSchema = new Schema({
   title: {
     type: String,
-    required: true
+    required: true,
+  },
+  eventPhoto: {
+    type: String,
+  },
+  time: {
+    type: String,
+  },
+  detailsLink: {
+    type: String,
+  },
+});
+
+const classSchema = new Schema({
+  title: {
+    type: String,
+    required: true,
+  },
+  description: {
+    type: String,
+  },
+  timings: {
+    type: String,
   },
   price: {
-    type: String,
-    required: true
-  }
+    type: Number,
+  },
 });
 
 const professionalsSchema = new Schema({
   CMS_ID: {
     type: String,
-    required: true
+    required: true,
   },
-  name: {
+  slug: {
     type: String,
-    required: true
+    required: true,
+  },
+  firstName: {
+    type: String,
+    required: true,
+  },
+  lastName: {
+    type: String,
+    required: true,
   },
   description: {
     type: String,
-    required: true
-  },
-  experience: {
-    type: String,
-    required: true
+    required: true,
   },
   facebookLink: {
     type: String,
-    required: true
+  },
+  websiteLink: {
+    type: String,
   },
   instagramLink: {
     type: String,
-    required: true
   },
-  image: {
+  profilePhoto: {
     type: String,
-    required: true
+    required: true,
+  },
+  carouselPhotos: {
+    type: [String],
+    required: true,
+  },
+  videoLink: {
+    type: String,
   },
   categories: {
-    type: [String]
+    type: [String],
   },
-  timings: {
-    type: [timingsSchema]
+  events: {
+    type: [eventSchema],
   },
-  courses: {
-    type: [coursesSchema]
-  }
+  classes: {
+    type: [classSchema],
+  },
 });
 
 module.exports = mongoose.model("Professionals", professionalsSchema);
