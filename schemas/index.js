@@ -148,6 +148,8 @@ module.exports = gql`
       offset: Int = 0
     ): ProfessionalOutboundMessage!
 
+    getEvents: String!
+
     getBookmarkedPostsForAUser(userId: ID!): [InformationMessage!]
     checkIfPostBookmarkedByUser(userId: ID!, CMS_ID: String!): Boolean
   }

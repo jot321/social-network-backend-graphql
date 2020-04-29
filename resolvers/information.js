@@ -424,6 +424,19 @@ module.exports = {
         throw err;
       }
     },
+    getEvents: async (parent, args) => {
+      try {
+        let professionalsList_;
+
+        professionalsList_ = await Professional.find({
+          "events.live": "true",
+        });
+
+        return JSON.stringify(professionalsList_);
+      } catch (err) {
+        throw err;
+      }
+    },
     getVideoPlaylistNames: async (parent, args) => {
       try {
         let messages = [];
