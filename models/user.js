@@ -22,6 +22,10 @@ const userSchema = new Schema({
   bookmarkedPosts: {
     type: [String],
   },
+  expert: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 module.exports = mongoose.model("User", userSchema);

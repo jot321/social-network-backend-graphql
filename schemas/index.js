@@ -94,6 +94,11 @@ module.exports = gql`
     hasMore: Boolean
   }
 
+  type UserInformationOutput {
+    systemId: String!
+    expert: Boolean!
+  }
+
   input UserInput {
     user_id: ID!
     name: String!
@@ -103,6 +108,9 @@ module.exports = gql`
 
   type Query {
     posts: [Post!]!
+
+    getIndividualContent(articleId: String): OutboundMessage!
+
     getHomeFeed(
       sortByLikes: Boolean = false
       dailyPicks: Boolean = false
@@ -157,7 +165,7 @@ module.exports = gql`
   type Mutation {
     createPost(postInput: PostInput): Post
 
-    addOrUpdateUser(userInput: UserInput): Boolean
+    addOrUpdateUser(userInput: UserInput): UserInformationOutput
     bookmarkPost(userId: String, CMS_ID: String): Boolean
     unBookmarkPost(userId: String, CMS_ID: String): Boolean
 
@@ -167,5 +175,15 @@ module.exports = gql`
     decrementShares(id: ID!): Boolean
     incrementBookmarks(id: ID!): Boolean
     decrementBookmarks(id: ID!): Boolean
+    addExpertComment(
+      CMS_ID: String!
+      content: String!
+      userId: String!
+      writtenByExpert: Boolean = false
+    ): Boolean
+    incrementExpertCommentLikes(CMS_ID: String!, CommentId: String!): Boolean
+
+    createForum(forum_name: String, forum_slug: String): Boolean
+    createDiscussion: Boolean
   }
 `;

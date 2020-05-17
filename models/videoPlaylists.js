@@ -7,9 +7,19 @@ const videoLinkSchema = new Schema({
     type: String,
     required: true,
   },
+  title: {
+    type: String,
+    required: false,
+  },
   videoLink: {
     type: String,
     required: true,
+  },
+  playlistTitle: {
+    type: String,
+  },
+  playlistId: {
+    type: String,
   },
 });
 

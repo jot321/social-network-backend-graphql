@@ -1,13 +1,16 @@
 const postsResolver = require("./posts");
+const forumResolver = require("./forum");
 const informationResolver = require("./information");
 
 const rootResolver = {
   Query: {
-    ...informationResolver.Query
+    ...informationResolver.Query,
+    ...forumResolver.Query,
   },
   Mutation: {
-    ...informationResolver.Mutation
-  }
+    ...informationResolver.Mutation,
+    ...forumResolver.Mutation,
+  },
 };
 
 module.exports = rootResolver;

@@ -1,6 +1,7 @@
 const ShortArticle = require("../models/shortArticles");
 const Listicle = require("../models/listicles");
 const ImageArticle = require("../models/imageArticles");
+const ExternalLink = require("../models/externalLink");
 const Tip = require("../models/tips");
 const Professional = require("../models/professionals");
 const VideoPlaylist = require("../models/videoPlaylists").videoPlaylistsSchema;
@@ -16,6 +17,7 @@ const InformationType = {
   TIP: 4,
   VIDEOPLAYLIST: 5,
   VIDEOLINK: 6,
+  EXTERNAL_LINK: 7,
 };
 
 const populateInformationMessages = async (informationPropertiesList) => {
@@ -25,6 +27,7 @@ const populateInformationMessages = async (informationPropertiesList) => {
     informationPropertiesList.map(async (element) => {
       let message_;
 
+      // Populate the relevant content piece to the message
       switch (element.type) {
         case InformationType.SHORT_ARTICLE:
           message_ = await ShortArticle.findOne({
@@ -38,6 +41,12 @@ const populateInformationMessages = async (informationPropertiesList) => {
 
         case InformationType.IMAGE_ARTICLE:
           message_ = await ImageArticle.findOne({
+            CMS_ID: element.CMS_ID,
+          });
+          break;
+
+        case InformationType.EXTERNAL_LINK:
+          message_ = await ExternalLink.findOne({
             CMS_ID: element.CMS_ID,
           });
           break;
@@ -169,6 +178,37 @@ module.exports = {
         }
         // SEARCH BY CATEGORIES
         else if (args.category) {
+          // informationPropertiesList_ = await InformationProperties.aggregate([
+          //   {
+          //     $match: {
+          //       $and: [
+          //         { hide: false },
+          //         { sub_category_names: args.category },
+          //         {
+          //           $or: [
+          //             {
+          //               type: {
+          //                 $in: [
+          //                   InformationType.SHORT_ARTICLE,
+          //                   InformationType.LISTICLE,
+          //                   InformationType.TIP,
+          //                   InformationType.EXTERNAL_LINK,
+          //                 ],
+          //               },
+          //             },
+          //             {
+          //               $and: [
+          //                 { type: InformationType.VIDEOLINK },
+          //                 { hide: false },
+          //               ],
+          //             },
+          //           ],
+          //         },
+          //       ],
+          //     },
+          //   },
+          // ]).allowDiskUse(true);
+
           informationPropertiesList_ = await InformationProperties.find({
             hide: false,
             sub_category_names: args.category,
@@ -181,6 +221,7 @@ module.exports = {
 
           count_ = await InformationProperties.find({
             hide: false,
+            sub_category_names: args.category,
           }).countDocuments();
         }
         // SEARCH BY TAGS
@@ -282,6 +323,9 @@ module.exports = {
                 InformationType.SHORT_ARTICLE,
                 InformationType.LISTICLE,
                 InformationType.TIP,
+                InformationType.EXTERNAL_LINK,
+                InformationType.VIDEOLINK,
+                InformationType.IMAGE_ARTICLE,
               ],
             },
           },
@@ -522,6 +566,7 @@ module.exports = {
             const individualVideoInformation_ = {};
             individualVideoInformation_.CMS_ID = video.CMS_ID;
             individualVideoInformation_.videoLink = video.videoLink;
+            individualVideoInformation_.title = video.title;
 
             individualVideoInformation_.properties = await InformationProperties.findOne(
               {
@@ -584,12 +629,16 @@ module.exports = {
   Mutation: {
     addOrUpdateUser: async (parent, args) => {
       try {
-        User.findOne({ id: args.userInput.user_id })
+        const result = await User.findOne({ id: args.userInput.user_id })
           .exec()
-          .then((docs) => {
+          .then(async (docs) => {
             if (docs) {
               console.log("User already exists");
-              return true;
+
+              return {
+                systemId: docs._id,
+                expert: docs.expert == true ? true : false,
+              };
             } else {
               const user = new User({
                 id: args.userInput.user_id,
@@ -598,22 +647,29 @@ module.exports = {
                 image_url: args.userInput.image_url,
               });
 
-              user
+              const newUserResult = await user
                 .save()
-                .then(() => {
+                .then((docs) => {
                   console.log("New user added");
-                  return true;
+
+                  return {
+                    systemId: docs._id,
+                    expert: docs.expert == true ? true : false,
+                  };
                 })
                 .catch((err) => {
                   console.log(err);
                   return false;
                 });
+              return newUserResult;
             }
           })
           .catch((err) => {
             console.log(err);
             return false;
           });
+
+        return result;
       } catch {
         (err) => {
           console.log(err);
@@ -764,6 +820,88 @@ module.exports = {
           .save()
           .then(() => true)
           .catch(() => false);
+      } catch (err) {
+        throw err;
+      }
+    },
+    addExpertComment: async (parent, args) => {
+      try {
+        // TODO : Use the update method to do the following operation
+        const properties = await InformationProperties.findOne({
+          CMS_ID: args.CMS_ID,
+        });
+
+        if (args.userId === "GUEST") {
+          properties.expertComments.push({
+            content: args.content,
+            writtenByGuest: true,
+            userName: "Guest",
+          });
+          properties.discussionsCount = properties.discussionsCount + 1;
+        } else if (args.writtenByExpert == true) {
+          const user = await User.findOne({ _id: args.userId });
+          properties.expertComments.push({
+            content: args.content,
+            userId: args.userId,
+            userName: user.name,
+            writtenByExpert: true,
+          });
+          properties.expertCommentsCount = properties.expertCommentsCount + 1;
+        } else {
+          const user = await User.findOne({ _id: args.userId });
+          properties.expertComments.push({
+            content: args.content,
+            userId: args.userId,
+            userName: user.name,
+          });
+          properties.discussionsCount = properties.discussionsCount + 1;
+        }
+
+        await properties
+          .save()
+          .then()
+          .catch((err) => {
+            console.log(err);
+          });
+
+        properties.topComments = properties.expertComments
+          .sort((a, b) => b.likes - a.likes)
+          .slice(0, 2);
+
+        properties
+          .save()
+          .then()
+          .catch((err) => {
+            console.log(err);
+          });
+      } catch (err) {
+        throw err;
+      }
+    },
+    incrementExpertCommentLikes: async (parent, args) => {
+      try {
+        await InformationProperties.updateOne(
+          {
+            CMS_ID: args.CMS_ID,
+            expertComments: { $elemMatch: { _id: args.CommentId } },
+          },
+          { $inc: { "expertComments.$.likes": 1 } }
+        );
+
+        const properties = await InformationProperties.findOne({
+          CMS_ID: args.CMS_ID,
+        });
+
+        properties.topComments = properties.expertComments
+          .sort((a, b) => b.likes - a.likes)
+          .slice(0, 2);
+
+        properties
+          .save()
+          .then()
+          .catch((err) => {
+            console.log(err);
+          });
       } catch (err) {
         throw err;
       }

@@ -2,6 +2,39 @@ const mongoose = require("mongoose");
 
 const Schema = mongoose.Schema;
 
+const commentsSchema = new Schema({
+  content: {
+    type: String,
+    required: true,
+  },
+  userId: {
+    type: mongoose.Schema.ObjectId,
+    ref: "user",
+  },
+  userName: {
+    type: String,
+  },
+  likes: {
+    type: Number,
+    default: 0,
+  },
+  shares: {
+    type: Number,
+    default: 0,
+  },
+  replies: {
+    type: [String],
+  },
+  writtenByGuest: {
+    type: Boolean,
+    default: false,
+  },
+  writtenByExpert: {
+    type: Boolean,
+    default: false,
+  },
+});
+
 const informationPropertiesSchema = new Schema({
   CMS_ID: {
     type: String,
@@ -24,9 +57,25 @@ const informationPropertiesSchema = new Schema({
     required: true,
     default: 0,
   },
+  expertComments: {
+    type: [commentsSchema],
+    default: [],
+  },
+  expertCommentsCount: {
+    type: Number,
+    default: 0,
+  },
+  discussionsCount: {
+    type: Number,
+    default: 0,
+  },
+  topComments: {
+    type: [commentsSchema],
+    default: [],
+  },
   importance: {
     type: Number,
-    required: true,
+    default: 0,
   },
   daily_pick: {
     type: Boolean,
@@ -55,9 +104,6 @@ const informationPropertiesSchema = new Schema({
   },
   sub_category_names: {
     type: [String],
-  },
-  video_sub_category: {
-    type: String,
   },
 });
 
