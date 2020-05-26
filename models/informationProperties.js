@@ -47,10 +47,12 @@ const informationPropertiesSchema = new Schema({
   likes: {
     type: Number,
     required: true,
+    default: 0,
   },
   shares: {
     type: Number,
     required: true,
+    default: 0,
   },
   bookmarks: {
     type: Number,
@@ -80,10 +82,12 @@ const informationPropertiesSchema = new Schema({
   daily_pick: {
     type: Boolean,
     required: true,
+    default: false,
   },
   hide: {
     type: Boolean,
     required: true,
+    default: false,
   },
   popular: {
     type: Boolean,
@@ -92,18 +96,27 @@ const informationPropertiesSchema = new Schema({
   },
   top_level_category_name: {
     type: String,
+    default: "",
   },
   top_level_category_slug: {
     type: String,
+    default: "",
   },
   visible_tags_names: {
     type: [String],
+    default: [],
   },
   not_visible_tags_names: {
     type: [String],
+    default: [],
   },
   sub_category_names: {
     type: [String],
+    default: [],
+  },
+  groups: {
+    type: [String],
+    default: [],
   },
 });
 

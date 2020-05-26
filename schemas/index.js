@@ -116,11 +116,13 @@ module.exports = gql`
       dailyPicks: Boolean = false
       fetchLimit: Int = 5
       offset: Int = 0
+      group: String = null
       toplevelcategory: String = null
       category: String = null
       tag: String = null
       searchKey: String = null
       articleId: String = null
+      contentType: Int = null
     ): OutboundMessage!
 
     getRandomSampledArticleIds: [String!]!
@@ -182,6 +184,14 @@ module.exports = gql`
       writtenByExpert: Boolean = false
     ): Boolean
     incrementExpertCommentLikes(CMS_ID: String!, CommentId: String!): Boolean
+
+    addQuestion(
+      title: String!
+      text: String
+      userId: String
+      topLevelCategory: String
+      group: String
+    ): Boolean
 
     createForum(forum_name: String, forum_slug: String): Boolean
     createDiscussion: Boolean

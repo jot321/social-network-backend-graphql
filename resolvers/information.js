@@ -3,10 +3,13 @@ const Listicle = require("../models/listicles");
 const ImageArticle = require("../models/imageArticles");
 const ExternalLink = require("../models/externalLink");
 const Tip = require("../models/tips");
+const Question = require("../models/question");
 const Professional = require("../models/professionals");
 const VideoPlaylist = require("../models/videoPlaylists").videoPlaylistsSchema;
 const VideoLink = require("../models/videoPlaylists").videoLinkSchema;
 const User = require("../models/user");
+
+const sentenceToSlug = require("../helpers").sentenceToSlug;
 
 const InformationProperties = require("../models/informationProperties");
 
@@ -18,6 +21,7 @@ const InformationType = {
   VIDEOPLAYLIST: 5,
   VIDEOLINK: 6,
   EXTERNAL_LINK: 7,
+  QUESTION: 8,
 };
 
 const populateInformationMessages = async (informationPropertiesList) => {
@@ -65,6 +69,12 @@ const populateInformationMessages = async (informationPropertiesList) => {
 
         case InformationType.VIDEOLINK:
           message_ = await VideoLink.findOne({
+            CMS_ID: element.CMS_ID,
+          });
+          break;
+
+        case InformationType.QUESTION:
+          message_ = await Question.findOne({
             CMS_ID: element.CMS_ID,
           });
           break;
@@ -142,6 +152,7 @@ module.exports = {
             CMS_ID: args.articleId,
           });
         }
+
         // ACTUAL SEARCH
         else if (args.searchKey) {
           informationPropertiesList_ = await InformationProperties.find({
@@ -159,56 +170,57 @@ module.exports = {
             hide: false,
           }).countDocuments();
         }
+
+        // SEARCH BY GROUPS
+        else if (args.group) {
+          informationPropertiesList_ = await InformationProperties.find({
+            hide: false,
+            groups: args.group,
+          })
+            .sort({
+              importance: -1,
+            })
+            .skip(args.offset)
+            .limit(args.fetchLimit);
+
+          count_ = await InformationProperties.find({
+            hide: false,
+            groups: args.group,
+          }).countDocuments();
+        }
+
         // SEARCH BY TOP LEVEL CATEGORIES
         else if (args.toplevelcategory) {
-          informationPropertiesList_ = await InformationProperties.find({
-            hide: false,
-            top_level_category_name: args.toplevelcategory,
-          })
-            .sort({
-              importance: -1,
+          if (args.contentType) {
+            informationPropertiesList_ = await InformationProperties.find({
+              hide: false,
+              top_level_category_name: args.toplevelcategory,
+              type: args.contentType,
             })
-            .skip(args.offset)
-            .limit(args.fetchLimit);
-
+              .sort({
+                importance: -1,
+              })
+              .skip(args.offset)
+              .limit(args.fetchLimit);
+          } else {
+            informationPropertiesList_ = await InformationProperties.find({
+              hide: false,
+              top_level_category_name: args.toplevelcategory,
+            })
+              .sort({
+                importance: -1,
+              })
+              .skip(args.offset)
+              .limit(args.fetchLimit);
+          }
           count_ = await InformationProperties.find({
             hide: false,
             top_level_category_name: args.toplevelcategory,
           }).countDocuments();
         }
+
         // SEARCH BY CATEGORIES
         else if (args.category) {
-          // informationPropertiesList_ = await InformationProperties.aggregate([
-          //   {
-          //     $match: {
-          //       $and: [
-          //         { hide: false },
-          //         { sub_category_names: args.category },
-          //         {
-          //           $or: [
-          //             {
-          //               type: {
-          //                 $in: [
-          //                   InformationType.SHORT_ARTICLE,
-          //                   InformationType.LISTICLE,
-          //                   InformationType.TIP,
-          //                   InformationType.EXTERNAL_LINK,
-          //                 ],
-          //               },
-          //             },
-          //             {
-          //               $and: [
-          //                 { type: InformationType.VIDEOLINK },
-          //                 { hide: false },
-          //               ],
-          //             },
-          //           ],
-          //         },
-          //       ],
-          //     },
-          //   },
-          // ]).allowDiskUse(true);
-
           informationPropertiesList_ = await InformationProperties.find({
             hide: false,
             sub_category_names: args.category,
@@ -224,6 +236,7 @@ module.exports = {
             sub_category_names: args.category,
           }).countDocuments();
         }
+
         // SEARCH BY TAGS
         else if (args.tag) {
           informationPropertiesList_ = await InformationProperties.find({
@@ -240,6 +253,7 @@ module.exports = {
             hide: false,
           }).countDocuments();
         }
+
         // FEATURED CATEGORY - DAILY_PICK
         else if (args.dailyPicks) {
           informationPropertiesList_ = await InformationProperties.find({
@@ -257,6 +271,7 @@ module.exports = {
             daily_pick: true,
           }).countDocuments();
         }
+
         // POPULAR CATEGORY - SORT BY LIKES
         else if (args.sortByLikes) {
           informationPropertiesList_ = await InformationProperties.find({
@@ -901,6 +916,50 @@ module.exports = {
           .then()
           .catch((err) => {
             console.log(err);
+          });
+      } catch (err) {
+        throw err;
+      }
+    },
+    addQuestion: async (parent, args) => {
+      try {
+        const question = new Question({
+          title: args.title,
+          text: args.text,
+        });
+
+        await question
+          .save()
+          .then((question) => {
+            // Copying _id to CMS_ID, because whole Strapi supported backend uses CMS_ID
+            question.CMS_ID = question._id;
+            question
+              .save()
+              .then(() => {
+                const informationProperties = new InformationProperties({
+                  CMS_ID: question._id,
+                  type: InformationType.QUESTION,
+                  top_level_category_name: args.topLevelCategory
+                    .toLowerCase()
+                    .trim(),
+                  top_level_category_slug: sentenceToSlug(
+                    args.topLevelCategory.toLowerCase().trim()
+                  ),
+                });
+
+                informationProperties
+                  .save()
+                  .then()
+                  .catch((error) => {
+                    console.log(error);
+                  });
+              })
+              .catch((error) => {
+                console.log(error);
+              });
+          })
+          .catch((error) => {
+            console.log(error);
           });
       } catch (err) {
         throw err;
