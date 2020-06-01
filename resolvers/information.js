@@ -90,7 +90,7 @@ const populateInformationMessages = async (informationPropertiesList) => {
           properties: JSON.stringify(element),
         });
       }
-    })
+    }, Promise.resolve())
   );
   return messages;
 };
@@ -173,20 +173,33 @@ module.exports = {
 
         // SEARCH BY GROUPS
         else if (args.group) {
-          informationPropertiesList_ = await InformationProperties.find({
-            hide: false,
-            groups: args.group,
-          })
-            .sort({
-              importance: -1,
+          if (args.contentType) {
+            informationPropertiesList_ = await InformationProperties.find({
+              hide: false,
+              groups: args.group,
+              type: args.contentType,
             })
-            .skip(args.offset)
-            .limit(args.fetchLimit);
+              .skip(args.offset)
+              .limit(args.fetchLimit);
 
-          count_ = await InformationProperties.find({
-            hide: false,
-            groups: args.group,
-          }).countDocuments();
+            count_ = await InformationProperties.find({
+              hide: false,
+              groups: args.group,
+              type: args.contentType,
+            }).countDocuments();
+          } else {
+            informationPropertiesList_ = await InformationProperties.find({
+              hide: false,
+              groups: args.group,
+            })
+              .skip(args.offset)
+              .limit(args.fetchLimit);
+
+            count_ = await InformationProperties.find({
+              hide: false,
+              groups: args.group,
+            }).countDocuments();
+          }
         }
 
         // SEARCH BY TOP LEVEL CATEGORIES
@@ -202,6 +215,12 @@ module.exports = {
               })
               .skip(args.offset)
               .limit(args.fetchLimit);
+
+            count_ = await InformationProperties.find({
+              hide: false,
+              top_level_category_name: args.toplevelcategory,
+              type: args.contentType,
+            }).countDocuments();
           } else {
             informationPropertiesList_ = await InformationProperties.find({
               hide: false,
@@ -212,80 +231,102 @@ module.exports = {
               })
               .skip(args.offset)
               .limit(args.fetchLimit);
+
+            count_ = await InformationProperties.find({
+              hide: false,
+              top_level_category_name: args.toplevelcategory,
+            }).countDocuments();
           }
-          count_ = await InformationProperties.find({
-            hide: false,
-            top_level_category_name: args.toplevelcategory,
-          }).countDocuments();
         }
 
         // SEARCH BY CATEGORIES
-        else if (args.category) {
-          informationPropertiesList_ = await InformationProperties.find({
-            hide: false,
-            sub_category_names: args.category,
-          })
-            .sort({
-              importance: -1,
-            })
-            .skip(args.offset)
-            .limit(args.fetchLimit);
+        // else if (args.category) {
+        //   informationPropertiesList_ = await InformationProperties.find({
+        //     hide: false,
+        //     sub_category_names: args.category,
+        //   })
+        //     .sort({
+        //       importance: -1,
+        //     })
+        //     .skip(args.offset)
+        //     .limit(args.fetchLimit);
 
-          count_ = await InformationProperties.find({
-            hide: false,
-            sub_category_names: args.category,
-          }).countDocuments();
-        }
+        //   count_ = await InformationProperties.find({
+        //     hide: false,
+        //     sub_category_names: args.category,
+        //   }).countDocuments();
+        // }
 
-        // SEARCH BY TAGS
-        else if (args.tag) {
-          informationPropertiesList_ = await InformationProperties.find({
-            hide: false,
-            visible_tags_names: args.tag,
-          })
-            .sort({
-              importance: -1,
-            })
-            .skip(args.offset)
-            .limit(args.fetchLimit);
+        // // SEARCH BY TAGS
+        // else if (args.tag) {
+        //   informationPropertiesList_ = await InformationProperties.find({
+        //     hide: false,
+        //     visible_tags_names: args.tag,
+        //   })
+        //     .sort({
+        //       importance: -1,
+        //     })
+        //     .skip(args.offset)
+        //     .limit(args.fetchLimit);
 
-          count_ = await InformationProperties.find({
-            hide: false,
-          }).countDocuments();
-        }
+        //   count_ = await InformationProperties.find({
+        //     hide: false,
+        //   }).countDocuments();
+        // }
 
-        // FEATURED CATEGORY - DAILY_PICK
-        else if (args.dailyPicks) {
-          informationPropertiesList_ = await InformationProperties.find({
-            hide: false,
-            daily_pick: true,
-          })
-            .sort({
-              importance: -1,
-            })
-            .skip(args.offset)
-            .limit(args.fetchLimit);
+        // // FEATURED CATEGORY - DAILY_PICK
+        // else if (args.dailyPicks) {
+        //   informationPropertiesList_ = await InformationProperties.find({
+        //     hide: false,
+        //     daily_pick: true,
+        //   })
+        //     .sort({
+        //       importance: -1,
+        //     })
+        //     .skip(args.offset)
+        //     .limit(args.fetchLimit);
 
-          count_ = await InformationProperties.find({
-            hide: false,
-            daily_pick: true,
-          }).countDocuments();
-        }
+        //   count_ = await InformationProperties.find({
+        //     hide: false,
+        //     daily_pick: true,
+        //   }).countDocuments();
+        // }
 
         // POPULAR CATEGORY - SORT BY LIKES
         else if (args.sortByLikes) {
-          informationPropertiesList_ = await InformationProperties.find({
-            hide: false,
-            popular: true,
-          })
-            .sort({
-              likes: -1,
+          if (args.contentType) {
+            informationPropertiesList_ = await InformationProperties.find({
+              hide: false,
+              popular: true,
+              type: args.contentType,
             })
-            .skip(args.offset)
-            .limit(args.fetchLimit);
-          count_ = await InformationProperties.find({
-            hide: false,
-          }).countDocuments();
+              .sort({
+                likes: -1,
+              })
+              .skip(args.offset)
+              .limit(args.fetchLimit);
+
+            count_ = await InformationProperties.find({
+              hide: false,
+              popular: true,
+              type: args.contentType,
+            }).countDocuments();
+          } else {
+            informationPropertiesList_ = await InformationProperties.find({
+              hide: false,
+              popular: true,
+            })
+              .sort({
+                likes: -1,
+              })
+              .skip(args.offset)
+              .limit(args.fetchLimit);
+
+            count_ = await InformationProperties.find({
+              hide: false,
+              popular: true,
+            }).countDocuments();
+          }
         } else {
           informationPropertiesList_ = await InformationProperties.find({
             hide: false,
@@ -945,6 +986,7 @@ module.exports = {
                   top_level_category_slug: sentenceToSlug(
                     args.topLevelCategory.toLowerCase().trim()
                   ),
+                  groups: [args.group],
                 });
 
                 informationProperties
