@@ -26,6 +26,10 @@ const userSchema = new Schema({
     type: Boolean,
     default: false,
   },
+  slug: {
+    type: String,
+    default: "",
+  },
 });
 
 module.exports = mongoose.model("User", userSchema);

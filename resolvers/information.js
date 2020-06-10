@@ -532,6 +532,14 @@ module.exports = {
           "events.live": "true",
         });
 
+        // professionalsList_.map((professional) => {
+        //   console.log(
+        //     professional.events.filter((event) => {
+        //       return event.live === "true" ? true : false;
+        //     })
+        //   );
+        // });
+
         return JSON.stringify(professionalsList_);
       } catch (err) {
         throw err;
@@ -901,6 +909,7 @@ module.exports = {
             userId: args.userId,
             userName: user.name,
             writtenByExpert: true,
+            slug: user.slug,
           });
           properties.expertCommentsCount = properties.expertCommentsCount + 1;
         } else {

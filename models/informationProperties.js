@@ -14,6 +14,9 @@ const commentsSchema = new Schema({
   userName: {
     type: String,
   },
+  slug: {
+    type: String,
+  },
   likes: {
     type: Number,
     default: 0,
