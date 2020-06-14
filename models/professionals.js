@@ -55,6 +55,14 @@ const professionalsSchema = new Schema({
     type: String,
     required: true,
   },
+  byline: {
+    type: String,
+    required: true,
+  },
+  offer: {
+    type: String,
+    required: true,
+  },
   facebookLink: {
     type: String,
   },
@@ -83,6 +91,14 @@ const professionalsSchema = new Schema({
   },
   classes: {
     type: [classSchema],
+  },
+  top_level_category_name: {
+    type: String,
+    default: "",
+  },
+  importance: {
+    type: Number,
+    default: 0,
   },
 });
 

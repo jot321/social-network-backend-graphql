@@ -154,7 +154,8 @@ module.exports = gql`
 
     getProfessionals(
       slug: String = null
-      fetchLimit: Int = 5
+      toplevelcategory: String = null
+      fetchLimit: Int = 100
       offset: Int = 0
     ): ProfessionalOutboundMessage!
 

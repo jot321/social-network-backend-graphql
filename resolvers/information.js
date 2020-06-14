@@ -503,8 +503,20 @@ module.exports = {
             slug: args.slug,
           });
           count_ = 1;
+        } else if (args.toplevelcategory) {
+          professionalsList_ = await Professional.find({
+            top_level_category_name: args.toplevelcategory,
+          })
+            .sort({ importance: -1 })
+            .skip(args.offset)
+            .limit(args.fetchLimit);
+
+          count_ = await Professional.find({
+            top_level_category_name: args.toplevelcategory,
+          }).countDocuments();
         } else {
           professionalsList_ = await Professional.find()
+            .sort({ importance: -1 })
             .skip(args.offset)
             .limit(args.fetchLimit);
 
@@ -515,6 +527,10 @@ module.exports = {
         if (args.offset + args.fetchLimit > count_) {
           hasMore = false;
         }
+
+        professionalsList_ = professionalsList_.sort((x, y) => {
+          return y.importance - x.importance;
+        });
 
         return {
           messages: JSON.stringify(professionalsList_),

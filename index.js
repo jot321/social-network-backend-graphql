@@ -1,6 +1,6 @@
 // While using AWS Lambda the following package can be used a Lambda function can directly be used
-const { ApolloServer } = require("apollo-server-lambda");
-// const { ApolloServer } = require("apollo-server");
+// const { ApolloServer } = require("apollo-server-lambda");
+const { ApolloServer } = require("apollo-server");
 
 const mongoose = require("mongoose");
 const config = require("./config.json");
@@ -10,8 +10,8 @@ const resolvers = require("./resolvers");
 
 mongoose
   .connect(
-    `mongodb+srv://${config.MONGO_USER}:${config.MONGO_PASSWORD}@${config.MONGO_CLUSTER}/${config.MONGO_DB}?retryWrites=true`
-    // "mongodb://root:example@127.0.0.1:27017"
+    // `mongodb+srv://${config.MONGO_USER}:${config.MONGO_PASSWORD}@${config.MONGO_CLUSTER}/${config.MONGO_DB}?retryWrites=true`
+    "mongodb://root:example@127.0.0.1:27017"
   )
   .then(() => {
     console.log("MongoDb Connected!!!");
@@ -25,15 +25,15 @@ const server = new ApolloServer({ typeDefs, resolvers });
 
 // -------------------------
 // To deploy the server on AWS Lambda
-exports.graphqlHandler = server.createHandler({
-  cors: {
-    origin: true,
-    credentials: true,
-  },
-});
+// exports.graphqlHandler = server.createHandler({
+//   cors: {
+//     origin: true,
+//     credentials: true,
+//   },
+// });
 
 // -------------------------
 // To run the server locally
-// server.listen().then(({ url }) => {
-//   console.log(`🚀  Server ready at ${url}`);
-// });
+server.listen().then(({ url }) => {
+  console.log(`🚀  Server ready at ${url}`);
+});
